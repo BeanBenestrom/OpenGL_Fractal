@@ -73,13 +73,10 @@ void main()
     // float pop_gray = -(gray_scale * gray_scale) + 2 * gray_scale;
     float pop_gray = 1.1 - 0.11 / (gray_scale + 0.1);
 	// float gray_scale = sin(float(i));
-    //float gray_scale = 1 - float((int(10000 * float(i) / iterations) % 2000)) / 2000;
-    // float gray_scale = cos(float(int(10000 * (float(i) / iterations)) % 2000) / 2000 * (3.14 / 2));
 
     color.x = color.x * pop_gray;
 	color.y = color.y * pop_gray;
 	color.z = color.z * pop_gray;
-    
 
 	if (i == iterations) { color.x = 0; color.y = 0; color.z = 0; }
 

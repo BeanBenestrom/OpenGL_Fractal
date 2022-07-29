@@ -24,20 +24,28 @@
 #define GLFW_CLOSE glfwDestroyWindow(window); glfwTerminate(); return 0
 
 
+
 namespace screenSettings
 {
     int width = 600;
     int height = 600;
 }
+enum FRACTAL_OPTIONS { MANDELBROT, JULIA, BOTH };   // Do not change
 
 
 // Fractal Settings
+
 float position[2] = {0, 0};
 float zoom = 1;
 float speed = 1;
 int iterations = 300;
 
 float variablePosition[2] = {0, 0};
+
+// Choose what fractal types are implemented (MANDELBROT, JULIA, BOTH) - if BOTH, the user will be asked which one they want
+#define FRACTAL_OPTION BOTH  
+
+////////////////////////////////////////////////////////////////////////////////////////
 
 
 // timing 
@@ -64,6 +72,7 @@ int variable_box_size = std::min(screenSettings::width, screenSettings::height) 
 int variable_box_on = (variable_box_size >= 20);
 int variable_position_in_box_offset[2] = {0, 0};
 float temp_variablePosition[2] = {0, 0};
+int chosen_fractal;
 
 
 void APIENTRY glDebugOutput(GLenum source, 
@@ -291,7 +300,28 @@ GLuint compile_shader(const GLchar* shaderSource, GLenum shaderType)
 
 int main()
 {
-    std::cout << "\n" << MODE << " mode is enabled\n";
+    std::cout << "\n" << MODE << " mode is enabled\n\n\n";
+
+    if (FRACTAL_OPTION == BOTH)
+        {
+            do
+            {
+                std::cout << "Choose a fractal\n\n";
+                std::cout << "0 - Mandelbrot Set\n";
+                std::cout << "1 - Julia Set\n\n";
+
+                std::cin >> chosen_fractal;
+
+                if (chosen_fractal != 0 && chosen_fractal != 1)
+                {                
+                    std::cout << chosen_fractal << " is not a valid choice\n---------------------\n\n";
+                }       
+            } while (chosen_fractal != 0 && chosen_fractal != 1);
+            std::cout << "---------------------\n\n";
+        }
+    else {
+        chosen_fractal = FRACTAL_OPTION;
+    }
 
     // Setup GLFW
     if (glfwInit() == GLFW_FALSE) { 
@@ -353,19 +383,23 @@ int main()
 
         glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &work_group_invocations);
 
-        std::cout << "MAX work group count: " << work_group_count[0] << " " << work_group_count[1] << " " << work_group_count[2];
-        std::cout << "MAX work group size: " << work_group_size[0] << " " << work_group_size[1] << " " << work_group_size[2];
-        std::cout << "MAX work group invocations: " << work_group_invocations;
+        // std::cout << "MAX work group count: " << work_group_count[0] << " " << work_group_count[1] << " " << work_group_count[2];
+        // std::cout << "\nMAX work group size: " << work_group_size[0] << " " << work_group_size[1] << " " << work_group_size[2];
+        // std::cout << "\nMAX work group invocations: " << work_group_invocations << "\n\n";
 
         int s1, s2;
         std::string vertexShaderSource, fragmentShaderSource;
         s1 = utility::load_text_from_file(vertexShaderSource, "shaders/vertexShader.vs");
         s2 = utility::load_text_from_file(fragmentShaderSource, "shaders/fractalFragmentShader.fs");
         if (!s1) { 
-            std::cout << "[!] UTILITY - Could not load VERTEX SHADER from source file!\n    PATH: shaders/vertexShader.vs\n"; 
+            std::cout << "[!] UTILITY - Could not load VERTEX SHADER from source file!\n    PATH: shaders/vertexShader.vs\n";
+            std::cin >> error;
+            GLFW_CLOSE;
         }
         if (!s2) { 
-            std::cout << "[!] UTILITY - Could not load FRAGMENT SHADER from source file!\n    PATH: shaders/fractalFragmentShader.fs\n"; 
+            std::cout << "[!] UTILITY - Could not load FRAGMENT SHADER from source file!\n    PATH: shaders/fractalFragmentShader.fs\n";
+            std::cin >> error;
+            GLFW_CLOSE;
         }
         
         const GLchar* vS = vertexShaderSource.c_str();
@@ -434,8 +468,7 @@ int main()
         glUniform1f(_width, (float)screenSettings::width);
         glUniform1f(_height, (float)screenSettings::height);
         glUniform2f(_variable_position_in_box_offset, 0.0f, 0.0f);
-
-        std::cout << variable_box_size << " " << variable_box_on << "\n";
+        glUniform1i(glGetUniformLocation(shaderProgram, "mandel_or_julia"), chosen_fractal);
         glUniform1i(_mode, mode);
         int container[2];
 

@@ -61,25 +61,11 @@ void main()
 	}
 
 	// Color
-    
-    float t = 15 * float(i) / iterations + 3.14 + 3.14 / 8;
+    float gray_scale = 1 - float(i) / iterations;
 
-    color.x = (0.5 * cos(t) + 0.5);
-	color.y = (0.5 * sin(t) + 0.5);
-	color.z = (1 - 0.5 * (cos(t) + sin(t) + 2));
-
-
-    float gray_scale = float(i) / iterations;
-    // float pop_gray = -(gray_scale * gray_scale) + 2 * gray_scale;
-    float pop_gray = 1.1 - 0.11 / (gray_scale + 0.1);
-	// float gray_scale = sin(float(i));
-    //float gray_scale = 1 - float((int(10000 * float(i) / iterations) % 2000)) / 2000;
-    // float gray_scale = cos(float(int(10000 * (float(i) / iterations)) % 2000) / 2000 * (3.14 / 2));
-
-    color.x = color.x * pop_gray;
-	color.y = color.y * pop_gray;
-	color.z = color.z * pop_gray;
-    
+    color.x = gray_scale;
+	color.y = gray_scale;
+	color.z = gray_scale;
 
 	if (i == iterations) { color.x = 0; color.y = 0; color.z = 0; }
 
