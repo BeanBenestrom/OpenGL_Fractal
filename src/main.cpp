@@ -38,7 +38,6 @@ float speed = 1;
 int iterations = 300;
 
 float variablePosition[2] = {0, 0};
-#define SHADER_MODE 1   // Compute shader: 0   Only fragment shader: 1
 
 
 // timing 
@@ -47,7 +46,6 @@ float lastFrame = 0.0f; // time of last frame
 int fCounter = 0;
 
 // ids
-GLuint tex_output = 0;
 GLint _width;
 GLint _height;
 GLint _variable_position;
@@ -258,16 +256,10 @@ void window_size_callback(GLFWwindow* window, int width, int height)
 
     glViewport(0, 0, width, height);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex_output);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
-
-    #if SHADER_MODE == 1
     glUniform1f(_width, (float)width);
     glUniform1f(_height, (float)height);
     glUniform1i(_variable_box_size, variable_box_size);
     glUniform1i(_variable_box_on, variable_box_on);
-    #endif
 }
 
 
@@ -287,10 +279,7 @@ GLuint compile_shader(const GLchar* shaderSource, GLenum shaderType)
         GLchar message[1024];
         glGetShaderInfoLog(shader, 1024, &log_length, message);
         
-        std::cout << "[!] OPENGL - ";
-        if (shaderType == GL_VERTEX_SHADER) { std::cout << "VERTEX SHADER"; }
-        else if (shaderType == GL_FRAGMENT_SHADER) { std::cout << "FRAGMENT SHADER"; }
-        else if (shaderType == GL_COMPUTE_SHADER) { std::cout << "COMPUTE SHADER"; }
+        std::cout << "[!] OPENGL - " << (shaderType == GL_VERTEX_SHADER ? "VERTEX SHADER" : "FRAGMENT SHADER" );
         std::cout << " compilation error:\n" << message << "\n";
         
         return GL_NONE;
@@ -348,16 +337,6 @@ int main()
     #endif
 
     {
-        glGenTextures(1, &tex_output);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, tex_output);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenSettings::width, screenSettings::height, 0, GL_RGBA, GL_FLOAT, 0);
-        glBindImageTexture(0, tex_output, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-
         int work_group_count[3];
 
         glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_group_count[0]);
@@ -374,34 +353,24 @@ int main()
 
         glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &work_group_invocations);
 
-        int s1, s2, s3;
-        std::string vertexShaderSource, fragmentShaderSource, computeShaderSource;
-        s1 = utility::load_text_from_file(vertexShaderSource, "shaders/vertexShader.vs");
-        #if SHADER_MODE == 0
-        s2 = utility::load_text_from_file(fragmentShaderSource, "shaders/fragmentShader.fs");
-        s3 = utility::load_text_from_file(computeShaderSource, "shaders/computeShader.comp");
-        else if (!s2) { 
-            std::cout << "[!] UTILITY - Could not load FRAGMENT SHADER from source file!\n    PATH: shaders/fragmentShader.fs\n"; 
-        }
-        else if (!s3) { 
-            std::cout << "[!] UTILITY - Could not load COMPUTE SHADER from source file!\n    PATH: shaders/computeShader.comp\n"; 
-        }
-        #elif SHADER_MODE == 1
-        s2 = utility::load_text_from_file(fragmentShaderSource, "shaders/fractalFragmentShader.fs");
-        if (!s2) { 
-            std::cout << "[!] UTILITY - Could not load FRAGMENT SHADER from source file!\n    PATH: shaders/fractalFragmentShader.fs\n"; 
-        }
-        #endif
+        std::cout << "MAX work group count: " << work_group_count[0] << " " << work_group_count[1] << " " << work_group_count[2];
+        std::cout << "MAX work group size: " << work_group_size[0] << " " << work_group_size[1] << " " << work_group_size[2];
+        std::cout << "MAX work group invocations: " << work_group_invocations;
 
+        int s1, s2;
+        std::string vertexShaderSource, fragmentShaderSource;
+        s1 = utility::load_text_from_file(vertexShaderSource, "shaders/vertexShader.vs");
+        s2 = utility::load_text_from_file(fragmentShaderSource, "shaders/fractalFragmentShader.fs");
         if (!s1) { 
             std::cout << "[!] UTILITY - Could not load VERTEX SHADER from source file!\n    PATH: shaders/vertexShader.vs\n"; 
         }
+        if (!s2) { 
+            std::cout << "[!] UTILITY - Could not load FRAGMENT SHADER from source file!\n    PATH: shaders/fractalFragmentShader.fs\n"; 
+        }
         
-
         const GLchar* vS = vertexShaderSource.c_str();
         const GLchar* fS = fragmentShaderSource.c_str();
-        const GLchar* cS = computeShaderSource.c_str();
-
+        
 
         // REGULAR SHADER
         GLuint vertexShader = compile_shader(vS, GL_VERTEX_SHADER);
@@ -426,27 +395,6 @@ int main()
         glDeleteShader(fragmentShader);
 
 
-        // COMPUTE SHADER
-        #if SHADER_MODE == 0
-        GLuint computeShader = compile_shader(cS, GL_COMPUTE_SHADER);
-
-        GLuint computeProgram = glCreateProgram();
-        glAttachShader(computeProgram, computeShader);
-        glLinkProgram(computeProgram);
-        
-        // Check for linking failure
-        glGetProgramiv(computeProgram, GL_LINK_STATUS, &link_success);
-        if (link_success != GL_TRUE)
-        {
-            GLsizei log_length = 0;
-            GLchar message[1024];
-            glGetProgramInfoLog(computeProgram, 1024, &log_length, message);            
-            std::cout << "[!] OPENGL - Program linking error:\n" << message << "\n";
-        }
-
-        glDeleteShader(computeShader);
-        #endif
-
         // Objects
         const GLfloat vertices[] = {
         -1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
@@ -467,22 +415,6 @@ int main()
         vertexArray.link_atribute(vertexBuffer, 2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
         vertexArray.link_EBO(elementBuffer);
     
-        #if SHADER_MODE == 0
-        GLint _position = glGetUniformLocation(computeProgram, "position");
-        GLint _zoom = glGetUniformLocation(computeProgram, "zoom");
-        GLint _iterations = glGetUniformLocation(computeProgram, "iterations");
-        
-        _variable_position = glGetUniformLocation(computeProgram, "variable_position");
-        _variable_on_screen = glGetUniformLocation(computeProgram, "variable_on_screen");
-        _variable_box_size = glGetUniformLocation(computeProgram, "variable_box_size");
-        _variable_box_on = glGetUniformLocation(computeProgram, "variable_box_on");
-        _mode = glGetUniformLocation(computeProgram, "mode");
-
-        glUseProgram(computeProgram);
-        glUniform1f(_width, (float)screenSettings::width);
-        glUniform1f(_height, (float)screenSettings::height);
-
-        #elif SHADER_MODE == 1
         GLint _position = glGetUniformLocation(shaderProgram, "position");
         GLint _zoom = glGetUniformLocation(shaderProgram, "zoom");
         GLint _iterations = glGetUniformLocation(shaderProgram, "iterations");
@@ -502,7 +434,7 @@ int main()
         glUniform1f(_width, (float)screenSettings::width);
         glUniform1f(_height, (float)screenSettings::height);
         glUniform2f(_variable_position_in_box_offset, 0.0f, 0.0f);
-        #endif
+
         std::cout << variable_box_size << " " << variable_box_on << "\n";
         glUniform1i(_mode, mode);
         int container[2];
@@ -511,36 +443,17 @@ int main()
         {
             deltaTime = glfwGetTime() - lastFrame;
             lastFrame = glfwGetTime();
-
-            #if SHADER_MODE == 0
-            { // launch compute shaders!
-                glBindImageTexture(0, tex_output, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-                glUseProgram(computeProgram);
-                glUniform2f(_position, position[0], position[1]);
-                glUniform1f(_zoom, 5.0f / screenSettings::width * zoom);
-                glUniform1i(_iterations, iterations);
-                world_to_screen(container, variablePosition[0], variablePosition[1]);
-                glUniform2i(_variable_on_screen, container[0], (int)(screenSettings::height - container[1]));
-                glDispatchCompute((GLuint)ceil((float)screenSettings::width/8), (GLuint)ceil((float)screenSettings::height/4), 1);
-            }
-            
-            // make sure writing to image has finished before read
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT); // GL_ALL_BARRIER_BITS 
-            #endif
             
             { // normal drawing pass
-                #if SHADER_MODE == 1
                 glUniform2f(_position, position[0], position[1]);
                 glUniform1f(_zoom, 5.0f / screenSettings::width * zoom);
                 glUniform1i(_iterations, iterations);
                 world_to_screen(container, variablePosition[0], variablePosition[1]);
                 glUniform2i(_variable_on_screen, container[0], (int)(screenSettings::height - container[1]));
-                #endif
 
                 glClear(GL_COLOR_BUFFER_BIT);
                 glUseProgram(shaderProgram);
                 vertexArray.bind();
-                glBindTexture(GL_TEXTURE_2D, tex_output);
                 glDrawElements(GL_TRIANGLE_STRIP, sizeof(vertices) / sizeof(GLfloat), GL_UNSIGNED_INT, (const void*)0);
             }
             

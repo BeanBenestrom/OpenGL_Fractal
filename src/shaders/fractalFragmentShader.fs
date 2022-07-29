@@ -61,64 +61,6 @@ void main()
 	color.y = (0.5 * sin(t) + 0.5);
 	color.z = (1 - 0.5 * (cos(t) + sin(t) + 2));
 
-    // if (i < iterations / 20)
-    // {
-    //     color.x = color.x * (-cos(t) * 0.5 + 0.5);
-    //     color.y = color.y * (-cos(t) * 0.5 + 0.5);
-    //     color.z = color.z * (-cos(t) * 0.5 + 0.5);
-    // }
-
-    // color.x = 0;
-	// color.y = 0;
-	// color.z = 0;
-    // int color_cycles = 5;
-    // int section = int(float(iterations) / color_cycles / 3);
-    // int i_color_section = i % int(section * 3);
-    // int color_gradient = i_color_section / (section * 3);
-
-    // if (i_color_section <= section)
-    // {
-    //     color.z = color_gradient;
-	//     color.y = 1 - color_gradient;
-    // }
-    // else if (section <= i_color_section && i_color_section <= 2 * section)
-    // {
-    //     color.y = color_gradient;
-	//     color.x = 1 - color_gradient;
-    // }
-    // else if (2 * section <= i_color_section)
-    // {
-    //     color.x = color_gradient;
-	//     color.z = 1 - color_gradient;
-    // }
-
-
-    // color.x = 0;
-	// color.y = 0;
-	// color.z = 0;
-    // int color_cycles = 5;
-    // int section = int(float(iterations) / color_cycles / 3);
-    // int i_color_section = i % int(section * 3);
-
-    // if (i_color_section <= section)
-    // {   
-    //     float scale = cos(float(i_color_section) / 3 / section * 3.14) * 0.5 + 0.5;    
-    //     color.x = scale;
-	//     color.y = 1 - scale;
-    // }
-    // else if (section <= i_color_section && i_color_section <= 2 * section)
-    // {
-    //     float scale = cos(float(i_color_section) / 3 / section * 3.14) * 0.5 + 0.5;
-    //     color.y = scale;
-	//     color.z = 1 - scale;
-    // }
-    // else if (2 * section <= i_color_section)
-    // {
-    //     float scale = cos(float(i_color_section) / 3 / section * 3.14) * 0.5 + 0.5;
-    //     color.z = scale;
-	//     color.x = 1 - scale;
-    // }
-
 
     // float gray_scale = float(i) / iterations;
 	// // float gray_scale = sin(float(i));
