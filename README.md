@@ -2,10 +2,15 @@
 
 WASD - movement
 
+```
+```
+
 E - zoom inward
 
 Q - zoom outward
 
+```
+```
 
 R - reset position
 
@@ -13,6 +18,8 @@ R - reset position
 
 2 - variable mode
 
+```
+```
 
 LEFT CLICK   - select / deselect
 
@@ -22,7 +29,7 @@ MIDDLE CLICK - give information  (mouse position on screen, mouse position on in
 
 ## MODES
 
-In variable mode there is a green dot that acts as a variable for the fractal.\n
+In variable mode there is a green dot that acts as a variable for the fractal.
 This green dot can be moved by first selecting it with LEFT CLICK.
 On the top right corner there is also another smaller green dot which can be moved to offset the variable by a smaller amount.
 
