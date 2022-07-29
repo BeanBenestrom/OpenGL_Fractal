@@ -1,6 +1,6 @@
 # Fractal visualizer made with OpenGL
 
-![image](fractal13.png)
+![image](fractal13.PNG)
 
 ### CONTROLS
 
