@@ -1,25 +1,14 @@
 ## CONTROLS
 
-WASD - movement
+> WASD - movement
 
-```
-```
+> E - zoom inward
+> Q - zoom outward
 
-E - zoom inward
+> R - reset position
+> 1 - free roam mode
+> 2 - variable mode
 
-Q - zoom outward
-
-```
-```
-
-R - reset position
-
-1 - free roam mode
-
-2 - variable mode
-
-```
-```
 
 LEFT CLICK   - select / deselect
 
