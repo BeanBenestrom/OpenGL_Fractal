@@ -1,0 +1,68 @@
+#version 430
+
+layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
+layout(rgba32f, binding = 0) uniform image2D img_output;
+
+uniform vec2 position;
+uniform float zoom;
+uniform int iterations;
+
+uniform vec2 variable_position;
+uniform vec2 variable_on_screen;
+uniform int variable_box_size;
+uniform int variable_box_on;
+uniform int mode;
+
+
+void main() 
+{
+	vec4 color = vec4(0, 0, 0, 1);
+	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+
+	int i = 0;
+	float x = 0; 
+	float y = 0;
+	float c_x = (float(gl_NumWorkGroups.x * gl_WorkGroupSize.x) * 0.5 - pixel_coords.x) * zoom + position.x;
+	float c_y = (pixel_coords.y - float(gl_NumWorkGroups.y * gl_WorkGroupSize.y) * 0.5) * zoom + position.y;
+	float temp_x;	// Do x first
+
+	while (i < iterations)
+	{
+		// Equation
+
+		// MandelBrot
+		// temp_x = x * x - y * y + c_x;
+		// y = 2 * x * y + c_y;
+
+		// Julia Set
+		temp_x = c_x * c_x - c_y * c_y + variable_position.x;
+		y = 2 * c_x * c_y + variable_position.y;
+
+		x = temp_x;
+
+		if (x * x + y * y > 4) { break; }
+		i++;
+	}
+
+	// Color
+	float gray_scale = sin(float(i));
+
+	color.x = gray_scale;
+	color.y = gray_scale;
+	color.z = gray_scale;
+
+	if (i == 0) { color.x = 0; color.y = 0; color.z = 0; }
+
+	// Draw dot
+    if ( mode == 2 && (
+		(pixel_coords.x - variable_on_screen.x) * (pixel_coords.x - variable_on_screen.x) + 
+		(pixel_coords.y - variable_on_screen.y) * (pixel_coords.y - variable_on_screen.y) < 25)
+	)
+    {
+        color.x = 0;
+        color.y = 1;
+        color.z = 0;
+    }
+
+	imageStore(img_output, pixel_coords, color);
+}
