@@ -46,7 +46,7 @@ float variablePosition[2] = {0, 0};
 #define FRACTAL_OPTION BOTH  
 
 #define VERTEX_SHADER   "shaders/vertexShader.vs"
-#define FRAGMENT_SHADER "shaders/fractalFragmentShaderWHITE.fs"
+#define FRAGMENT_SHADER "shaders/fractalFragmentShader.fs"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
