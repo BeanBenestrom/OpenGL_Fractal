@@ -3,7 +3,6 @@
 #include <string>
 #include <algorithm>
 
-#include <GLFW/glfw3.h>
 
 #ifdef _DEBUG 
 #define MODE "DEBUG"
@@ -81,34 +80,6 @@ int main()
     else {
         chosen_fractal = FRACTAL_OPTION;
     }
-
-    // Setup GLFW
-    if (glfwInit() == GLFW_FALSE) { 
-        std::cout << "[!] GLFW failed to intialize!\n";
-        std::cin >> error;
-        return 0; 
-    }
-    
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
-    #ifdef _DEBUG
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-    #endif
-
-
-    // Make window
-    GLFWwindow *window = glfwCreateWindow(screenSettings::width, screenSettings::height, "Learning Open GL COMPUTE", NULL, NULL);
-    if (!window) {  
-        std::cout << "[!] GLFW window failed to be created!\n";
-        glfwTerminate();
-        std::cin >> error;
-        return 0;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetWindowPos(window, 800, 100);
-    glfwSwapInterval(0);
 
     while (true)
     {
