@@ -1,4 +1,4 @@
-#version 460 core
+#version 200 core
 
 out vec4 FragColor;
 in vec2 texCoord;
