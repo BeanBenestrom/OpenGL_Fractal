@@ -11,6 +11,9 @@
 > Q - zoom outward
 >
 > R - reset position
+>
+> T - give info  (position, zoom)
+
 
 > 1 - free roam mode
 >
@@ -21,7 +24,7 @@
 > 
 > RIGHT CLICK  - teleport
 > 
-> MIDDLE CLICK - give information  (mouse position on screen, mouse position on in the world, zoom)
+> MIDDLE CLICK - give info  (mouse position on screen, mouse position on in the world, zoom)
 
 ### MODES
 

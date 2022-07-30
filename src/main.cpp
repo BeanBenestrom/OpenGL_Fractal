@@ -36,7 +36,7 @@ enum FRACTAL_OPTIONS { MANDELBROT, JULIA, BOTH };   // Do not change
 // Fractal Settings
 
 float position[2] = {0, 0};
-float zoom = 1;
+float zoom = 1;             // initial zoom
 float speed = 1;
 int iterations = 300;
 
@@ -44,6 +44,9 @@ float variablePosition[2] = {0, 0};
 
 // Choose what fractal types are implemented (MANDELBROT, JULIA, BOTH) - if BOTH, the user will be asked which one they want
 #define FRACTAL_OPTION BOTH  
+
+#define VERTEX_SHADER   "shaders/vertexShader.vs"
+#define FRAGMENT_SHADER "shaders/fractalFragmentShaderWHITE.fs"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +76,7 @@ int variable_box_on = (variable_box_size >= 20);
 int variable_position_in_box_offset[2] = {0, 0};
 float temp_variablePosition[2] = {0, 0};
 int chosen_fractal;
+bool info_hold;
 
 
 void APIENTRY glDebugOutput(GLenum source, 
@@ -151,6 +155,13 @@ void processInput(GLFWwindow *window, double deltaTime)
         position[1] = 0;
         zoom = 1;
     }
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS && !info_hold)
+    {
+        std::cout << "\nPosition: " << position[0] << " " << position[1] << "\n";
+        std::cout << "Zoom: " << zoom << "\n\n";
+        info_hold = true;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_I) == GLFW_RELEASE && info_hold) { info_hold = false; }
 
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
     { 
@@ -213,7 +224,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             variable_position_in_box_offset[0] = 0; variable_position_in_box_offset[1] = 0;
             glUniform2f(_variable_position_in_box_offset, variable_position_in_box_offset[0], variable_position_in_box_offset[2]);
         }
-        std::cout << variableHold << "\n";
+        // std::cout << variableHold << "\n";
     }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) 
     {      
@@ -301,23 +312,41 @@ GLuint compile_shader(const GLchar* shaderSource, GLenum shaderType)
 int main()
 {
     std::cout << "\n" << MODE << " mode is enabled\n\n\n";
+    char _a;
 
     if (FRACTAL_OPTION == BOTH)
         {
             do
             {
                 std::cout << "Choose a fractal\n\n";
-                std::cout << "0 - Mandelbrot Set\n";
-                std::cout << "1 - Julia Set\n\n";
+                std::cout << "1 - Mandelbrot Set\n";
+                std::cout << "2 - Julia Set\n";
+                std::cout << "0 - controls\n\n";
 
                 std::cin >> chosen_fractal;
+                std::cout << "\n";
+                if(std::cin.fail())
+                {
+                    std::cin.clear();
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    chosen_fractal = 42069;
+                }
 
-                if (chosen_fractal != 0 && chosen_fractal != 1)
+                if (chosen_fractal == 0)
+                {
+                    std::cout << "WASD - movement\n\nE - zoom inward\nQ - zoom outward\nR - reset position\nT - give info\n\n"
+                              << "1 - free roam mode\n2 - variable mode\n\n"
+                              << "LEFT CLICK   - select / deselect\nRIGHT CLICK  - teleport\n"
+                              << "MIDDLE CLICK - give info\n"
+                              << "--------------------------------\n\n";
+                }
+                else if (chosen_fractal != 1 && chosen_fractal != 2)
                 {                
-                    std::cout << chosen_fractal << " is not a valid choice\n---------------------\n\n";
-                }       
-            } while (chosen_fractal != 0 && chosen_fractal != 1);
+                    std::cout << "Not a valid choice\n------------------\n\n";
+                }   
+            } while (chosen_fractal != 1 && chosen_fractal != 2);
             std::cout << "---------------------\n\n";
+            chosen_fractal -= 1;
         }
     else {
         chosen_fractal = FRACTAL_OPTION;
@@ -383,21 +412,21 @@ int main()
 
         glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &work_group_invocations);
 
-        // std::cout << "MAX work group count: " << work_group_count[0] << " " << work_group_count[1] << " " << work_group_count[2];
-        // std::cout << "\nMAX work group size: " << work_group_size[0] << " " << work_group_size[1] << " " << work_group_size[2];
-        // std::cout << "\nMAX work group invocations: " << work_group_invocations << "\n\n";
+        std::cout << "MAX work group count: " << work_group_count[0] << " " << work_group_count[1] << " " << work_group_count[2];
+        std::cout << "\nMAX work group size: " << work_group_size[0] << " " << work_group_size[1] << " " << work_group_size[2];
+        std::cout << "\nMAX work group invocations: " << work_group_invocations << "\n\n";
 
         int s1, s2;
         std::string vertexShaderSource, fragmentShaderSource;
-        s1 = utility::load_text_from_file(vertexShaderSource, "shaders/vertexShader.vs");
-        s2 = utility::load_text_from_file(fragmentShaderSource, "shaders/fractalFragmentShader.fs");
+        s1 = utility::load_text_from_file(vertexShaderSource, VERTEX_SHADER);
+        s2 = utility::load_text_from_file(fragmentShaderSource, FRAGMENT_SHADER);
         if (!s1) { 
-            std::cout << "[!] UTILITY - Could not load VERTEX SHADER from source file!\n    PATH: shaders/vertexShader.vs\n";
+            std::cout << "[!] UTILITY - Could not load VERTEX SHADER from source file!\n    PATH: " << VERTEX_SHADER << "\n";
             std::cin >> error;
             GLFW_CLOSE;
         }
         if (!s2) { 
-            std::cout << "[!] UTILITY - Could not load FRAGMENT SHADER from source file!\n    PATH: shaders/fractalFragmentShader.fs\n";
+            std::cout << "[!] UTILITY - Could not load FRAGMENT SHADER from source file!\n    PATH: " << FRAGMENT_SHADER << "\n";
             std::cin >> error;
             GLFW_CLOSE;
         }
