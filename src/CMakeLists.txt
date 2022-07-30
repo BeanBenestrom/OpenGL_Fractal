@@ -1,9 +1,10 @@
 file(GLOB source_files ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-add_executable(Fractal "main.cpp")
+add_executable(Fractal ${source_files})
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 set_target_properties(Fractal PROPERTIES DEBUG_POSTFIX "_Debug")
+target_link_libraries(Fractal PRIVATE lib)
 
 
 function(copy_to)
