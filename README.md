@@ -12,7 +12,11 @@
 >
 > R - reset position
 >
-> T - give info  (position, zoom)
+> T - give info  (position, zoom, iterations, variable position)
+> 
+> X - add iteration
+> 
+> Z - remove iterations
 
 
 > 1 - free roam mode
@@ -24,7 +28,7 @@
 > 
 > RIGHT CLICK  - teleport
 > 
-> MIDDLE CLICK - give info  (mouse position on screen, mouse position on in the world, zoom)
+> MIDDLE CLICK - give info  (mouse position on screen, mouse position on in the world)
 
 ### MODES
 

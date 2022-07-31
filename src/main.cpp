@@ -46,7 +46,7 @@ float variablePosition[2] = {0, 0};
 #define FRACTAL_OPTION BOTH  
 
 #define VERTEX_SHADER   "shaders/vertexShader.vs"
-#define FRAGMENT_SHADER "shaders/fractalFragmentShader.fs"
+#define FRAGMENT_SHADER "shaders/fractalFragmentShaderBEST.fs"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,6 +65,7 @@ GLint _variable_on_screen;
 GLint _variable_box_size;
 GLint _variable_box_on;
 GLint _variable_position_in_box_offset;
+GLint _iterations;
 
 // Holder variables
 int mode = 1;           // Free roam mode: 1    Variable mode: 2
@@ -77,6 +78,8 @@ int variable_position_in_box_offset[2] = {0, 0};
 float temp_variablePosition[2] = {0, 0};
 int chosen_fractal;
 bool info_hold;
+float iteration_offset = 0;
+int default_iterations = iterations;
 
 
 void APIENTRY glDebugOutput(GLenum source, 
@@ -157,11 +160,26 @@ void processInput(GLFWwindow *window, double deltaTime)
     }
     if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS && !info_hold)
     {
+        std::cout << "\nVariable position: " << variablePosition[0] << " " << variablePosition[1] << "\n";
         std::cout << "\nPosition: " << position[0] << " " << position[1] << "\n";
-        std::cout << "Zoom: " << zoom << "\n\n";
+        std::cout << "Zoom: " << zoom << "\n";
+        std::cout << "Iterations: " << iterations << "\n\n";
         info_hold = true;
     }
     else if (glfwGetKey(window, GLFW_KEY_I) == GLFW_RELEASE && info_hold) { info_hold = false; }
+    
+    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+    {
+        iteration_offset -= 20 * deltaTime;
+        iterations = default_iterations + (int)iteration_offset;
+        glUniform1i(_iterations, iterations);
+    }
+    if(glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+    {
+        iteration_offset += 20 * deltaTime;
+        iterations = default_iterations + (int)iteration_offset;
+        glUniform1i(_iterations, iterations);
+    }
 
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
     { 
@@ -234,7 +252,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
         std::cout << "\nMouse position: " << cursor_x << " " << cursor_y << "\n";
         std::cout << "Position at mouse position: " << container[0] << " " << container[1] << "\n";
-        std::cout << "Zoom: " << zoom << "\n\n";
     }   
 }
 
@@ -248,7 +265,7 @@ void mouse_movement(GLFWwindow* window, double xPos, double yPos)
         // std::cout << variable_position_in_box_offset[0] << " " << variable_position_in_box_offset[1] << "\n";
 
         variablePosition[0] = temp_variablePosition[0] + variable_position_in_box_offset[0] * (5.0f / screenSettings::width * zoom) * 0.1;
-        variablePosition[1] = temp_variablePosition[1] + variable_position_in_box_offset[1] * (5.0f / screenSettings::width * zoom) * 0.1;
+        variablePosition[1] = temp_variablePosition[1] - variable_position_in_box_offset[1] * (5.0f / screenSettings::width * zoom) * 0.1;
 
         glUniform2f(_variable_position_in_box_offset, variable_position_in_box_offset[0], variable_position_in_box_offset[1]);
         glUniform2f(_variable_position, variablePosition[0], variablePosition[1]);
@@ -334,7 +351,9 @@ int main()
 
                 if (chosen_fractal == 0)
                 {
-                    std::cout << "WASD - movement\n\nE - zoom inward\nQ - zoom outward\nR - reset position\nT - give info\n\n"
+                    std::cout << "WASD - movement\n\n"
+                              << "E - zoom inward\nQ - zoom outward\nR - reset position\nT - give info\n"
+                              << "X - add iteration\nZ - remove iterations\n\n"
                               << "1 - free roam mode\n2 - variable mode\n\n"
                               << "LEFT CLICK   - select / deselect\nRIGHT CLICK  - teleport\n"
                               << "MIDDLE CLICK - give info\n"
@@ -369,7 +388,7 @@ int main()
 
 
     // Make window
-    GLFWwindow *window = glfwCreateWindow(screenSettings::width, screenSettings::height, "Learning Open GL COMPUTE", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(screenSettings::width, screenSettings::height, "Fractal Visualizer", NULL, NULL);
     if (!window) {  
         std::cout << "[!] GLFW window failed to be created!\n";
         glfwTerminate();
@@ -480,7 +499,7 @@ int main()
     
         GLint _position = glGetUniformLocation(shaderProgram, "position");
         GLint _zoom = glGetUniformLocation(shaderProgram, "zoom");
-        GLint _iterations = glGetUniformLocation(shaderProgram, "iterations");
+        _iterations = glGetUniformLocation(shaderProgram, "iterations");
 
         _variable_position = glGetUniformLocation(shaderProgram, "variable_position");
         _variable_on_screen = glGetUniformLocation(shaderProgram, "variable_on_screen");
@@ -492,6 +511,7 @@ int main()
         _variable_position_in_box_offset = glGetUniformLocation(shaderProgram, "variable_position_in_box_offset");
 
         glUseProgram(shaderProgram);
+        glUniform2f(_variable_position, variablePosition[0], variablePosition[1]);
         glUniform1i(_variable_box_size, variable_box_size);
         glUniform1i(_variable_box_on, variable_box_on);
         glUniform1f(_width, (float)screenSettings::width);
@@ -526,7 +546,7 @@ int main()
  
             fCounter++;
             if(fCounter > 1/deltaTime) {
-                std::cout << "FPS: " << 1 / deltaTime << std::endl;
+                std::cout << "Iterations: " << iterations << "   " << "FPS: " << int(1 / deltaTime) << std::endl;
                 // std::cout << "screen: " << screenSettings::width << ", " << screenSettings::height << "\n";
                 fCounter = 0;
             } 
