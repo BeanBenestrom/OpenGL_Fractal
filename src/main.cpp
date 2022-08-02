@@ -42,7 +42,7 @@ namespace screenSettings
 float position[2] = {0, 0};
 float zoom = 1;             // initial zoom
 float speed = 1;
-int iterations = 500;
+int iterations = 300;
 
 float variablePosition[2] = {0, 0};
 
