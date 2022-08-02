@@ -53,7 +53,7 @@ Match heights will do the same but for the height.
 They do this by zooming in when the lenght of the image is larger, or out when it is smaller.
 Do not match will simply take the image at the current location without changing zoom, keeping the same detail as seen on the window
 
-![comparison](FractalImageComparison.png)
+![comparison](FractalImageComparison3.png)
 
 ### TEXTURES
 
