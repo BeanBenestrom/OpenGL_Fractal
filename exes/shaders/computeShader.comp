@@ -1,0 +1,48 @@
+#version 430
+
+layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
+layout(rgba32f, binding = 0) uniform image2D img_output;
+
+uniform vec2 position;
+uniform float zoom;
+uniform int iterations;
+
+uniform vec2 variable_position;
+uniform int mandel_or_julia;
+
+
+void main() 
+{
+	vec4 color = vec4(0, 0, 0, 1);
+	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+
+	int i = 0;
+	float x = variable_position.x; 
+	float y = variable_position.y;
+	float c_x = (pixel_coords.x - float(gl_NumWorkGroups.x * gl_WorkGroupSize.x) * 0.5) * zoom + position.x;
+	float c_y = (pixel_coords.y - float(gl_NumWorkGroups.y * gl_WorkGroupSize.y) * 0.5) * zoom + position.y;
+	float temp_x;	// Do x first
+
+	while (i < iterations)
+	{
+		// Equation
+
+		// MandelBrot
+        if (mandel_or_julia == 0)
+        {
+            <MandelBrot>
+        }
+
+		// Julia Set
+        if (mandel_or_julia == 1)
+        {
+            <Julia Set>
+        }
+		i++;
+	}
+
+	// Color
+	<Color>
+
+	imageStore(img_output, pixel_coords, color);
+}

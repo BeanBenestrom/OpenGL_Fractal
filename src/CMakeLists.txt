@@ -19,9 +19,11 @@ endfunction()
 
 file(GLOB shaders ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*)
 file(GLOB images ${CMAKE_CURRENT_SOURCE_DIR}/textures/*)
+# file(fractal_settings ${CMAKE_CURRENT_SOURCE_DIR}/textures/*)
 
 copy_to(${CMAKE_CURRENT_BINARY_DIR}/shaders ${shaders})
 copy_to(${CMAKE_CURRENT_BINARY_DIR}/textures ${images})
+copy_to(${CMAKE_CURRENT_BINARY_DIR} "Fractal_Settings.vs")
 
 
 
